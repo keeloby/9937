@@ -2189,3 +2189,124 @@ Players.PlayerRemoving:Connect(function(player)
 		espObjects[player] = nil
 	end
 end)
+-- ==========================================
+-- 🎯 OP AIMBOT ENGINE (SUPPORT HP & PC)
+-- ==========================================
+local aimbotEnabled = false
+local aimbotFov = 150
+local aimTargetPart = "Head" -- "Head" atau "HumanoidRootPart"
+local showFovCircle = false
+local autoLockMobile = true -- Mengunci otomatis tanpa perlu tahan tombol mouse (Cocok untuk HP)
+
+local aimToggle, setAim = createToggleRow(visPage, "🎯", "AIMBOT (AUTO LOCK)")
+local fovToggle, setFovVis = createToggleRow(visPage, "⭕", "SHOW FOV CIRCLE")
+
+aimToggle.MouseButton1Click:Connect(function()
+	aimbotEnabled = not aimbotEnabled
+	setAim(aimbotEnabled)
+	showNotif("🎯 AIMBOT", aimbotEnabled and "Aktif! Auto Lock Target" or "Dimatikan", activeTheme.primary)
+end)
+
+fovToggle.MouseButton1Click:Connect(function()
+	showFovCircle = not showFovCircle
+	setFovVis(showFovCircle)
+end)
+
+createHybridSliderRow(visPage, "⭕", "FOV RADIUS", 50, 500, 150, function(v)
+	aimbotFov = v
+end)
+
+-- Pilihan Target Part (Kepala / Badan)
+local targetBtn = Instance.new("TextButton")
+targetBtn.Size = UDim2.new(0.92, 0, 0, 26)
+targetBtn.BackgroundColor3 = Color3.fromRGB(18, 24, 36)
+targetBtn.Text = "🎯 TARGET: HEAD"
+targetBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+targetBtn.Font = Enum.Font.GothamBold
+targetBtn.TextSize = 9
+targetBtn.Parent = visPage
+
+local targetCorner = Instance.new("UICorner")
+targetCorner.CornerRadius = UDim.new(0, 5)
+targetCorner.Parent = targetBtn
+
+targetBtn.MouseButton1Click:Connect(function()
+	if aimTargetPart == "Head" then
+		aimTargetPart = "HumanoidRootPart"
+		targetBtn.Text = "🎯 TARGET: BODY"
+	else
+		aimTargetPart = "Head"
+		targetBtn.Text = "🎯 TARGET: HEAD"
+	end
+	showNotif("🎯 AIM TARGET", aimTargetPart, activeTheme.primary)
+end)
+
+-- Drawing FOV Circle
+local fovCircle = nil
+if Drawing then
+	fovCircle = Drawing.new("Circle")
+	fovCircle.Thickness = 1.5
+	fovCircle.NumSides = 36
+	fovCircle.Radius = aimbotFov
+	fovCircle.Filled = false
+	fovCircle.Visible = false
+	fovCircle.Color = activeTheme.primary
+end
+
+local function getClosestPlayerToCenter()
+	local closestPlayer = nil
+	local shortestDistance = aimbotFov
+
+	-- Di HP / PC pakai titik tengah layar (Viewport Center)
+	local viewportCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= localPlayer and player.Character then
+			local char = player.Character
+			local targetPart = char:FindFirstChild(aimTargetPart)
+			local hum = char:FindFirstChildOfClass("Humanoid")
+
+			if targetPart and hum and hum.Health > 0 then
+				local screenPos, onScreen = camera:WorldToViewportPoint(targetPart.Position)
+				if onScreen then
+					local dist = (Vector2.new(screenPos.X, screenPos.Y) - viewportCenter).Magnitude
+					if dist < shortestDistance then
+						shortestDistance = dist
+						closestPlayer = player
+					end
+				end
+			end
+		end
+	end
+	return closestPlayer
+end
+
+-- Main Aimbot Loop
+RunService.RenderStepped:Connect(function()
+	local viewportCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+
+	-- Update FOV Circle di Tengah Layar (Sangat pas untuk Layar HP)
+	if fovCircle then
+		fovCircle.Position = viewportCenter
+		fovCircle.Radius = aimbotFov
+		fovCircle.Color = activeTheme.primary
+		fovCircle.Visible = showFovCircle
+	end
+
+	-- Lock Camera jika Aimbot Aktif
+	if aimbotEnabled then
+		-- Di HP: Otomatis ngunci target jika ada di dalam area FOV
+		-- Di PC: Juga bisa tahan Klik Kanan jika mau manual
+		local isHoldingRightClick = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+		
+		if autoLockMobile or isHoldingRightClick then
+			local targetPlayer = getClosestPlayerToCenter()
+			if targetPlayer and targetPlayer.Character then
+				local targetPart = targetPlayer.Character:FindFirstChild(aimTargetPart)
+				if targetPart then
+					camera.CFrame = CFrame.new(camera.CFrame.Position, targetPart.Position)
+				end
+			end
+		end
+	end
+end)
