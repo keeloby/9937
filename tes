@@ -1998,6 +1998,7 @@ showNotif("AERO ULTRA V12.6", "Module Hook Integrated!", activeTheme.primary)
 local waypoints = {}
 
 local wpNameInput = Instance.new("TextBox")
+local wpNameInput = Instance.new("TextBox")
 wpNameInput.Size = UDim2.new(0.92, 0, 0, 26)
 wpNameInput.BackgroundColor3 = Color3.fromRGB(18, 24, 36)
 wpNameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -2005,7 +2006,12 @@ wpNameInput.PlaceholderText = "Masukkan Nama Waypoint..."
 wpNameInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
 wpNameInput.Font = Enum.Font.Gotham
 wpNameInput.TextSize = 9
+wpNameInput.ClearTextOnFocus = false -- Menjaga input teks tidak mereset
+wpNameInput.TextEditable = true      -- Memastikan teks bisa diketik
+wpNameInput.Active = true            -- Mengaktifkan fokus interaksi
+wpNameInput.Text = ""                -- Set teks awal kosong
 wpNameInput.Parent = utilPage
+
 
 local wpInputCorner = Instance.new("UICorner")
 wpInputCorner.CornerRadius = UDim.new(0, 5)
