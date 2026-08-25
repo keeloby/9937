@@ -1996,21 +1996,40 @@ showNotif("AERO ULTRA V12.6", "Module Hook Integrated!", activeTheme.primary)
 -- 📌 WAYPOINT SYSTEM
 -- ==========================================
 local waypoints = {}
-
-local wpNameInput = Instance.new("TextBox")
 local wpNameInput = Instance.new("TextBox")
 wpNameInput.Size = UDim2.new(0.92, 0, 0, 26)
 wpNameInput.BackgroundColor3 = Color3.fromRGB(18, 24, 36)
 wpNameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-wpNameInput.PlaceholderText = "Masukkan Nama Waypoint..."
+wpNameInput.PlaceholderText = "Klik disini & ketik nama..."
 wpNameInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
 wpNameInput.Font = Enum.Font.Gotham
-wpNameInput.TextSize = 9
-wpNameInput.ClearTextOnFocus = false -- Menjaga input teks tidak mereset
-wpNameInput.TextEditable = true      -- Memastikan teks bisa diketik
-wpNameInput.Active = true            -- Mengaktifkan fokus interaksi
-wpNameInput.Text = ""                -- Set teks awal kosong
+wpNameInput.TextSize = 10
+wpNameInput.ClearTextOnFocus = false
+wpNameInput.TextEditable = true
+wpNameInput.Active = true
+wpNameInput.Selectable = true
+wpNameInput.ZIndex = 10 -- Menjebak layer agar selalu di paling depan
+wpNameInput.Text = ""
 wpNameInput.Parent = utilPage
+
+local wpInputCorner = Instance.new("UICorner")
+wpInputCorner.CornerRadius = UDim.new(0, 5)
+wpInputCorner.Parent = wpNameInput
+
+-- FIX FOCUS FOR EXECUTORS (Memaksa keyboard terhubung ke TextBox)
+wpNameInput.Focused:Connect(function()
+	wpNameInput.Selected = true
+	if UserInputService then
+		UserInputService.ModalEnabled = true
+	end
+end)
+
+wpNameInput.FocusLost:Connect(function()
+	wpNameInput.Selected = false
+	if UserInputService then
+		UserInputService.ModalEnabled = false
+	end
+end)
 
 
 local wpInputCorner = Instance.new("UICorner")
