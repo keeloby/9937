@@ -2059,34 +2059,6 @@ createButtonRow(utilPage, "🗑️", "CLEAR ALL WAYPOINTS", function()
 	showNotif("🗑️ WAYPOINT", "Semua waypoint dihapus", Color3.fromRGB(255, 80, 80))
 end)
 
-createButtonRow(utilPage, "💾", "SAVE WAYPOINT", function()
-	local name = wpNameInput.Text ~= "" and wpNameInput.Text or ("Waypoint " .. tostring(#waypoints + 1))
-	local char = localPlayer.Character
-	local hrp = char and char:FindFirstChild("HumanoidRootPart")
-	
-	if hrp then
-		table.insert(waypoints, { name = name, cf = hrp.CFrame })
-		showNotif("📌 WAYPOINT", "Tersimpan: " .. name, activeTheme.primary)
-		wpNameInput.Text = ""
-	end
-end)
-
-createButtonRow(utilPage, "📍", "TP TO LAST WAYPOINT", function()
-	local lastWp = waypoints[#waypoints]
-	local char = localPlayer.Character
-	if lastWp and char then
-		char:PivotTo(lastWp.cf)
-		showNotif("🚀 TELEPORT", "Ke: " .. lastWp.name, activeTheme.primary)
-	else
-		showNotif("⚠️ ERROR", "Belum ada waypoint tersimpan!", Color3.fromRGB(255, 80, 80))
-	end
-end)
-
-createButtonRow(utilPage, "🗑️", "CLEAR ALL WAYPOINTS", function()
-	table.clear(waypoints)
-	showNotif("🗑️ WAYPOINT", "Semua waypoint dihapus", Color3.fromRGB(255, 80, 80))
-end)
-
 -- ==========================================
 -- 👁️ ADVANCED FULL ESP ENGINE (DRAWING API)
 -- ==========================================
